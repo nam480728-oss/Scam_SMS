@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}SafeChat{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛡️%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% if current_user.is_authenticated and not hide_nav %}{% include "_nav.html" %}{% endif %}
+{% block content %}{% endblock %}
+<div id="toasts" aria-live="polite"></div>
+{% if current_user.is_authenticated %}
+<script>
+  window.SAFECHAT = {{ {"me": {"id": current_user.id, "username": current_user.username, "color": current_user.avatar_color}} | tojson }};
+</script>
+<script src="{{ url_for('static', filename='vendor/socket.io.min.js') }}"></script>
+{% endif %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

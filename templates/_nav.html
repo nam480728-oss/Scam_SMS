@@ -1,0 +1,28 @@
+<header class="topnav">
+  <a class="brand" href="{{ url_for('feed.feed_page') }}"><span class="logo">🛡️</span><span class="n">DangNam</span></a>
+  <nav class="navtabs" aria-label="Điều hướng chính">
+    <a class="navtab {{ 'active' if request.endpoint == 'feed.feed_page' }}" href="{{ url_for('feed.feed_page') }}" title="Bảng tin">
+      <svg viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3z"/></svg><span class="t">Bảng tin</span>
+    </a>
+    <a class="navtab {{ 'active' if request.endpoint == 'chat.messages_page' }}" href="{{ url_for('chat.messages_page') }}" title="Tin nhắn">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.1 2 11.2c0 2.9 1.4 5.4 3.7 7.1V22l3.4-1.9c.9.2 1.8.4 2.9.4 5.5 0 10-4.1 10-9.3S17.500 2 12 2zm1 12.5-2.600-2.800L5.500 14.500l5.400-5.800 2.600 2.800 4.900-2.800z"/></svg>
+      <span class="t">Tin nhắn</span><span class="badge hidden" id="nav-unread">0</span>
+    </a>
+  </nav>
+  <div class="nav-right">
+    <span class="model-chip" id="model-chip" title="Mô hình AI đang kiểm duyệt tin nhắn">🤖 <span id="model-name">AI</span></span>
+    <div class="menu">
+      <button class="menu-btn" id="user-menu-btn" aria-haspopup="true" aria-expanded="false">
+        <span class="avatar sm" style="background:{{ current_user.avatar_color }}">{{ current_user.username[:1] }}</span>
+        <b>{{ current_user.username }}</b>
+      </button>
+      <div class="dropdown hidden" id="user-menu" role="menu">
+        <div class="who">{{ current_user.username }}</div>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">🚪 Đăng xuất</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</header>

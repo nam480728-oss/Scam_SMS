@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Tin nhắn · SafeChat{% endblock %}
+{% block content %}
+<main class="chat-page">
+  <div class="chat-layout" id="chat-layout" data-initial-cid="{{ initial_cid or '' }}">
+
+    <!-- ===== Cột trái ===== -->
+    <section class="panel side-panel" aria-label="Danh sách">
+      <div class="side-head">
+        <h2>Đoạn chat</h2>
+        <div class="searchbox"><input id="search" type="search" placeholder="Tìm người dùng để kết bạn hoặc nhắn tin" autocomplete="off" aria-label="Tìm kiếm người dùng"></div>
+      </div>
+      <div class="tabs" id="tabs" role="tablist">
+        <button class="tab active" data-tab="chats" role="tab">Đoạn chat</button>
+        <button class="tab" data-tab="friends" role="tab">Bạn bè</button>
+        <button class="tab" data-tab="requests" role="tab">Lời mời<span class="badge hidden" id="tab-req-badge">0</span></button>
+        <button class="tab" data-tab="blocked" role="tab">Đã chặn</button>
+      </div>
+      <div class="list" id="list"></div>
+    </section>
+
+    <!-- ===== Khung chat ===== -->
+    <section class="panel chat-panel" id="chat-panel" aria-label="Cuộc trò chuyện">
+      <div class="chat-empty" id="chat-empty">
+        <div><span class="big">💬</span><h3>Chọn một đoạn chat</h3><p>Hoặc tìm bạn ở ô tìm kiếm bên trái, kết bạn rồi bắt đầu trò chuyện.</p></div>
+      </div>
+
+      <div class="chat-box hidden" id="chat-box">
+        <div class="chat-head">
+          <button class="icon-btn back-btn" id="back-btn" aria-label="Quay lại">←</button>
+          <span id="head-avatar"></span>
+          <div class="who"><b id="head-name"></b><small id="head-status"></small></div>
+          <div class="menu">
+            <button class="icon-btn" id="head-menu-btn" aria-label="Tùy chọn" aria-haspopup="true">⋮</button>
+            <div class="dropdown hidden" id="head-menu" role="menu"></div>
+          </div>
+        </div>
+
+        <div id="banner-box"></div>
+        <div class="msgs" id="msgs" aria-live="polite"></div>
+        <div class="typing" id="typing"></div>
+
+        <div class="composer-wrap" id="composer-wrap">
+          <div class="blocked-bar hidden" id="blocked-bar"></div>
+          <div id="composer-inner">
+            <div id="attach-slot"></div>
+            <div class="composer">
+              <button class="icon-btn" id="emoji-btn" type="button" aria-label="Chọn emoji">😊</button>
+              <button class="icon-btn" id="attach-btn" type="button" aria-label="Đính kèm ảnh hoặc tệp">📎</button>
+              <input type="file" id="file-input" class="hidden" accept="image/png,image/jpeg,image/gif,image/webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z">
+              <textarea id="input" rows="1" placeholder="Nhập tin nhắn…" maxlength="2000" aria-label="Nội dung tin nhắn"></textarea>
+              <button class="icon-btn send-btn" id="send-btn" type="button" aria-label="Gửi" disabled>➤</button>
+            </div>
+          </div>
+          <div class="emoji-pop hidden" id="emoji-pop"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/chat.js') }}"></script>{% endblock %}

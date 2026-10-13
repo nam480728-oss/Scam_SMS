@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Đăng nhập · SafeChat{% endblock %}
+{% block content %}
+<main class="auth-wrap">
+  <div class="auth-grid">
+    <section class="auth-intro">
+      <h1>SafeChat</h1>
+      <p>Trò chuyện cùng bạn bè, với AI luôn đứng giữa để cảnh báo khi có dấu hiệu lừa đảo.</p>
+      <p class="model-note" style="text-align:left;margin-top:18px">🤖 Mô hình AI đang dùng: <b>{{ ai_name() }}</b></p>
+    </section>
+    <section class="auth-card">
+      <h2>Đăng nhập</h2>
+      {% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}
+      <form method="post" autocomplete="on" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input class="input" name="username" placeholder="Tên tài khoản" value="{{ username }}" autocomplete="username" autofocus required maxlength="30">
+        <input class="input" type="password" name="password" placeholder="Mật khẩu" autocomplete="current-password" required maxlength="128">
+        <button class="btn btn-primary" type="submit">Đăng nhập</button>
+      </form>
+      <div class="sw">Chưa có tài khoản? <a href="{{ url_for('auth.register') }}"><b>Đăng ký</b></a></div>
+    </section>
+  </div>
+  <a class="admin-link" href="{{ url_for('models.admin_page') }}">Quản trị</a>
+</main>
+{% endblock %}

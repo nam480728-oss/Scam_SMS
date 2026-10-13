@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% set hide_nav = true %}
+{% block title %}Quản trị · SafeChat{% endblock %}
+{% block content %}
+<main class="auth-wrap">
+  <section class="auth-card" style="width:min(400px,100%)">
+    <h2>🛠️ Quản trị viên</h2>
+    <p style="color:var(--muted);margin:0 0 12px">Nhập mật khẩu quản trị để đổi mô hình AI của hệ thống.</p>
+    {% if error %}<div class="alert" role="alert">{{ error }}</div>{% endif %}
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input class="input" type="password" name="password" placeholder="Mật khẩu quản trị" autofocus required>
+      <button class="btn btn-primary" type="submit">Vào trang quản trị</button>
+    </form>
+    <div class="sw"><a href="{{ url_for('auth.login') }}">← Về trang đăng nhập</a></div>
+  </section>
+</main>
+{% endblock %}

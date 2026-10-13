@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% set hide_nav = true %}
+{% block title %}Chọn mô hình AI · SafeChat{% endblock %}
+{% block content %}
+<main class="select-page" id="select-page" data-next="{{ next_url }}">
+  {% if admin %}
+  <h1>🛠️ Quản trị · Đổi mô hình AI</h1>
+  <p class="sub">Mỗi mô hình có <b>tài khoản và dữ liệu chat riêng</b>. Khi đổi mô hình, mọi người dùng đang đăng nhập sẽ bị đăng xuất
+     và chỉ thấy tài khoản của mô hình mới. Đổi lại mô hình cũ thì tài khoản cũ xuất hiện lại.</p>
+  {% else %}
+  <h1>🛡️ SafeChat · Chọn mô hình AI</h1>
+  <p class="sub">AI sẽ đứng giữa hai người chat như một trọng tài, phát hiện tin nhắn có dấu hiệu lừa đảo và cảnh báo người nhận.
+     Hãy chọn mô hình bạn muốn demo — mô hình được chọn sẽ hoạt động cho toàn bộ hệ thống, người dùng chỉ việc đăng ký / đăng nhập.</p>
+  {% endif %}
+
+  <div class="cards" id="cards">
+    {% for m in models %}
+    <article class="model-card {{ 'disabled' if not m.available }}" data-key="{{ m.key }}" style="--c: {{ m.color }}" tabindex="0" role="button"
+             aria-label="Chọn {{ m.name }}">
+      {% if status.active == m.key %}<span class="active-tag">● Đang hoạt động</span>{% endif %}
+      <div class="icon">{{ m.icon }}</div>
+      <h2>{{ m.name }}</h2>
+      <p class="tag">{{ m.tagline }}</p>
+      <span class="kind">{{ m.kind }}</span>
+      <div class="stats">
+        <div class="stat"><b>{{ '%.1f' % (m.metrics.macro_f1 * 100) if m.metrics else '–' }}{{ '%' if m.metrics }}</b><span>macro-F1 (test)</span></div>
+        <div class="stat"><b>{{ '%.1f' % (m.metrics.recall * 100) if m.metrics else '–' }}{{ '%' if m.metrics }}</b><span>Recall lừa đảo</span></div>
+        <div class="stat"><b>{{ ('%.1f MB' % m.size_mb) if m.size_mb is not none else '–' }}</b><span>Dung lượng</span></div>
+      </div>
+      <button class="pick" type="button" tabindex="-1">{{ 'Tiếp tục với mô hình này' if status.active == m.key else 'Chọn mô hình này' }}</button>
+      {% if not m.available %}<div class="error-box" style="margin-top:10px">Chưa tìm thấy file mô hình (hãy train trước).</div>{% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  <div class="error-box hidden" id="select-error"></div>
+  {% if admin %}
+  <form method="post" action="{{ url_for('models.admin_logout') }}" style="margin-top:22px;display:flex;gap:10px;align-items:center">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <a class="btn" href="{{ url_for('auth.login') }}">← Về trang đăng nhập</a>
+    <button class="btn" type="submit">Thoát quản trị</button>
+  </form>
+  {% endif %}
+</main>
+
+<div class="loading-box hidden" id="loading">
+  <div>
+    <div class="spinner"></div>
+    <h2 id="loading-title" style="margin:0 0 6px">Đang nạp mô hình…</h2>
+    <p id="loading-sub" style="color:var(--muted);margin:0">Lần đầu có thể mất vài giây đến vài chục giây.</p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/select.js') }}"></script>{% endblock %}

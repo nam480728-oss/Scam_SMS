@@ -1,0 +1,63 @@
+# =============================================================================
+# CAU HINH HUAN LUYEN ViSoBERT - PHAN LOAI TIN NHAN LUA DAO
+# Moi tham so deu duoc ghi lai vao outputs/<run>/config_used.yaml sau khi chay.
+# Doi tham so: sua file nay HOAC ghi de bang tham so dong lenh (xem README.md).
+# =============================================================================
+
+run_name: visobert                 # tien to ten thu muc ket qua: outputs/<run_name>_<thoi gian>/
+seed: 42                           # hat giong ngau nhien (tai lap ket qua)
+
+# ----------------------------- DU LIEU ---------------------------------------
+data:
+  data_dir: ../data                # thu muc chua cac file xlsx (tinh tu thu muc VISO/)
+  train_file: Data_Scam_train.xlsx
+  val_file: Data_Scam_vali.xlsx
+  test_file: Data_Scam_test.xlsx   # CHI dung de danh gia cuoi cung, khong dung chon mo hinh
+
+# ----------------------------- TIEN XU LY ------------------------------------
+# ViSoBERT dung SentencePiece truc tiep tren van ban tho -> KHONG can tach tu (khac PhoBERT).
+text:
+  normalize_whitespace: true       # gop xuong dong, tab, nhieu dau cach thanh 1 dau cach
+  lowercase: false                 # giu nguyen hoa/thuong (ViSoBERT da hoc tu van ban mang xa hoi)
+
+# ----------------------------- MO HINH ---------------------------------------
+model:
+  name: uitnlp/visobert            # tai tu HuggingFace o lan chay dau (~400MB). XLM-R, pretrain tren van ban MXH tieng Viet
+  num_labels: 2
+  max_length: 256                  # so token toi da (ViSoBERT cho phep toi da 510). Dai hon se bi cat.
+  hidden_dropout_prob: 0.1         # dropout cac lop an cua encoder
+  attention_probs_dropout_prob: 0.1
+  classifier_dropout: null         # dropout dau phan loai; null = dung hidden_dropout_prob
+
+# ----------------------------- HUAN LUYEN ------------------------------------
+train:
+  epochs: 10                       # toi da; co the dung som (early stopping)
+  batch_size: 16                   # batch moi lan forward (RTX 4060 8GB + fp16: 16 la on dinh)
+  grad_accum_steps: 2              # tich luy gradient -> batch hieu dung = 16 x 2 = 32
+  eval_batch_size: 64
+  learning_rate: 2.0e-5            # toc do hoc toi da (PhoBERT fine-tune thuong 1e-5 ... 5e-5)
+  weight_decay: 0.01               # L2 kieu AdamW (khong ap dung cho bias/LayerNorm)
+  adam_epsilon: 1.0e-8
+  adam_beta1: 0.9
+  adam_beta2: 0.999
+  max_grad_norm: 1.0               # cat gradient chong no
+  lr_scheduler: linear             # linear | cosine
+  warmup_ratio: 0.1                # 10% so buoc dau tang dan learning rate tu 0
+  label_smoothing: 0.0             # 0 = tat
+  class_weight: balanced           # balanced = ban kinh phi theo ty le lop (lop 1 it hon) | none
+  precision: fp16                  # fp16 | bf16 | fp32 (CPU tu dong dung fp32)
+  num_workers: 0                   # Windows nen de 0
+  log_every_steps: 10              # ghi loss/lr/grad_norm moi N buoc toi uu
+  deterministic: false             # true = on dinh hon nhung cham hon
+
+# ----------------------------- DUNG SOM + CHON MO HINH -----------------------
+early_stopping:
+  monitor: macro_f1                # macro_f1 | accuracy | f1_scam | val_loss
+  patience: 3                      # dung neu {monitor} khong cai thien sau N epoch
+  min_delta: 0.0005
+
+# ----------------------------- DAU RA ----------------------------------------
+output:
+  dir: outputs                     # thu muc goc ket qua (tinh tu thu muc VISO/)
+  save_best_model: true            # luu checkpoint tot nhat (model + tokenizer) vao best_model/
+  n_error_samples: 200             # so dong sai toi da ghi vao file phan tich loi moi tap

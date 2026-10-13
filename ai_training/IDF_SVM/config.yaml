@@ -1,0 +1,78 @@
+# =============================================================================
+# CAU HINH HUAN LUYEN TF-IDF + LINEAR SVM - PHAN LOAI TIN NHAN LUA DAO
+# Moi tham so deu duoc ghi lai vao outputs/<run>/config_used.yaml sau khi chay.
+# Doi tham so: sua file nay HOAC ghi de bang --set (xem README.md).
+# =============================================================================
+
+run_name: tfidf_linear_svm         # tien to ten thu muc ket qua: outputs/<run_name>_<thoi gian>/
+seed: 42
+
+# ----------------------------- DU LIEU ---------------------------------------
+data:
+  data_dir: ../data                # tinh tu thu muc IDF_SVM/
+  train_file: Data_Scam_train.xlsx
+  val_file: Data_Scam_vali.xlsx    # dung de CHON bo tham so tot nhat + hieu chinh xac suat
+  test_file: Data_Scam_test.xlsx   # CHI de danh gia cuoi cung
+
+# ----------------------------- TIEN XU LY ------------------------------------
+# Cac gia tri nay la mac dinh; muc `search.grid.strip_accents` co the thay doi strip_accents.
+preprocess:
+  normalize_whitespace: true       # gop \n, tab, nhieu dau cach
+  lowercase: true                  # ha chu thuong
+  strip_accents: true              # bo dau tieng Viet (a->a, đ->d): giup tin co dau/khong dau cung 1 dac trung
+  mask_url: true                   # thay link bang token "urltoken" (link la dau hieu lua dao manh)
+  mask_phone: true                 # so dien thoai (0xxxxxxxxx / +84...) -> "sdttoken"
+  mask_account: true               # day so >= 9 chu so (so tai khoan) -> "sotktoken"
+  mask_money: true                 # so tien (500k, 2.500.000 VND, 3tr...) -> "tientoken"
+
+# ----------------------------- DAC TRUNG TF-IDF ------------------------------
+features:
+  use_word: true                   # TF-IDF theo tu (n-gram tu)
+  word:
+    ngram_range: [1, 2]
+    min_df: 2                      # bo n-gram xuat hien < 2 tin
+    max_df: 0.95                   # bo n-gram xuat hien > 95% tin
+    max_features: null             # null = khong gioi han
+  use_char: true                   # TF-IDF theo ky tu (bat loi chinh ta, bien the "ck", "chuyen khoan",...)
+  char:
+    analyzer: char_wb              # char_wb = n-gram ky tu trong ranh gioi tu
+    ngram_range: [2, 5]
+    min_df: 2
+    max_df: 1.0
+    max_features: null
+  sublinear_tf: true               # dung 1 + log(tf) thay tf tho
+  norm: l2
+
+# ----------------------------- MO HINH LINEAR SVM ----------------------------
+model:
+  C: 1.0                           # do phat sai (lon = it chinh quy hoa). Bi ghi de neu search.enabled
+  class_weight: balanced           # balanced | null. Bi ghi de neu search.enabled
+  loss: squared_hinge              # squared_hinge | hinge
+  max_iter: 20000
+  tol: 1.0e-4
+
+# ----------------------------- TIM SIEU THAM SO ------------------------------
+search:
+  enabled: true
+  cv_folds: 5                      # CV phan tang theo nhan + nhom mau (chong ro ri bien the cung khuon)
+  selection: val                   # val = chon theo macro-F1 tren tap validation | cv = chon theo CV trung binh tren train
+  grid:                            # moi to hop duoc huan luyen va ghi vao search_results.csv
+    C: [0.03, 0.1, 0.3, 1, 3, 10]
+    class_weight: [null, balanced]
+    strip_accents: [true, false]
+    word_ngram: [[1, 1], [1, 2]]
+    char_ngram: [[2, 4], [2, 5]]
+
+# ----------------------------- XAC SUAT (HIEU CHINH) -------------------------
+calibration:
+  platt_on_val: true               # Platt scaling tren validation -> xac suat 0..1 de ve ROC/PR + dung trong app
+
+# ----------------------------- PHAN TICH BO SUNG -----------------------------
+analysis:
+  learning_curve_fractions: [0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
+  top_features: 25                 # so dac trung quan trong nhat moi lop dua vao bieu do
+  ablation: true                   # so sanh chi-tu / chi-ky-tu / ca-hai
+
+output:
+  dir: outputs
+  n_error_samples: 200

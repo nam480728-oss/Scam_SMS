@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Bảng tin · SafeChat{% endblock %}
+{% block content %}
+<main class="feed-layout">
+  <aside class="left">
+    <div class="side-card">
+      <a class="row" href="{{ url_for('chat.messages_page') }}">
+        <span class="avatar" style="background:{{ current_user.avatar_color }}">{{ current_user.username[:1] }}</span>
+        <span>{{ current_user.username }}</span>
+      </a>
+      <a class="row" href="{{ url_for('chat.messages_page') }}">💬 Tin nhắn</a>
+    </div>
+    <div class="side-card">
+      <h4>Mô hình đang kiểm duyệt</h4>
+      <div class="tip">🤖 <b>{{ ai_name() }}</b><br>Mọi tin nhắn bạn nhận sẽ được AI kiểm tra và cảnh báo nếu nghi ngờ lừa đảo.</div>
+    </div>
+  </aside>
+
+  <section class="center" aria-label="Bảng tin">
+    {% for p in posts %}
+    <article class="post {{ 'warn' if p.author.name == 'Hội Cảnh Giác Mạng' }}">
+      <header class="post-head">
+        <span class="avatar" style="background:{{ p.author.avatar_color }}">{{ p.author.name[:1] }}</span>
+        <div><b>{{ p.author.name }}</b><small>{{ time_ago(p.created_at) }} · 🌐</small></div>
+      </header>
+      <div class="post-body">{{ p.content }}</div>
+      {% if p.image %}<img src="{{ url_for('static', filename=p.image) }}" alt="Ảnh bài viết" loading="lazy">{% endif %}
+      <div class="post-stats"><span>👍❤️ {{ '{:,}'.format(p.likes).replace(',', '.') }}</span><span>{{ p.comments }} bình luận · {{ p.shares }} lượt chia sẻ</span></div>
+      <div class="post-actions"><span>👍 Thích</span><span>💬 Bình luận</span><span>↪ Chia sẻ</span></div>
+    </article>
+    {% else %}
+    <div class="feed-note">Chưa có bài viết. Chạy <code>flask --app app seed-feed</code> để tạo dữ liệu mẫu.</div>
+    {% endfor %}
+    {% if posts %}<div class="feed-note">Bạn đã xem hết bảng tin 🎉 (dữ liệu mô phỏng)</div>{% endif %}
+  </section>
+
+  <aside class="right">
+    <div class="side-card">
+      <h4>Mẹo an toàn khi nhắn tin</h4>
+      <div class="tip">🔒 Không chia sẻ mã OTP, mật khẩu cho bất kỳ ai.</div>
+      <div class="tip">📞 Người thân nhờ chuyển tiền gấp? Hãy gọi điện xác minh trước.</div>
+      <div class="tip">🚫 Không bấm vào đường link lạ trong tin nhắn.</div>
+    </div>
+    <div class="side-card">
+      <h4>Lời mời kết bạn</h4>
+      <a class="row" href="{{ url_for('chat.messages_page') }}"><span class="avatar sm" style="background:var(--primary)">👥</span><span>Tìm &amp; kết bạn trong Tin nhắn <span class="badge hidden" id="feed-requests">0</span></span></a>
+    </div>
+  </aside>
+</main>
+{% endblock %}
